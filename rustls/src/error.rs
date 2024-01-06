@@ -5,7 +5,7 @@ use crate::rand;
 use std::error::Error as StdError;
 use std::fmt;
 use std::sync::Arc;
-use std::time::SystemTimeError;
+use web_time::SystemTimeError;
 
 /// rustls reports protocol errors using this type.
 #[non_exhaustive]
@@ -698,7 +698,7 @@ mod tests {
 
     #[test]
     fn time_error_mapping() {
-        use std::time::SystemTime;
+        use web_time::SystemTime;
 
         let time_error = SystemTime::UNIX_EPOCH
             .duration_since(SystemTime::now())

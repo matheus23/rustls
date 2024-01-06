@@ -9,7 +9,7 @@ use std::io::{self, Read, Write};
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use web_time::{Duration, Instant};
 
 use rustls::client::Resumption;
 use rustls::server::{

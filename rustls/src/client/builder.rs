@@ -11,7 +11,7 @@ use super::client_conn::Resumption;
 
 use std::marker::PhantomData;
 use std::sync::Arc;
-use std::time::SystemTime;
+use web_time::SystemTime;
 
 impl ConfigBuilder<ClientConfig, WantsVerifier> {
     /// Choose how to verify server certificates.

@@ -16,7 +16,28 @@ use crate::msgs::handshake::DistinguishedName;
 use ring::digest::Digest;
 
 use std::sync::Arc;
-use std::time::SystemTime;
+use web_time::SystemTime;
+#[cfg(all(
+	target_family = "wasm",
+	not(any(target_os = "emscripten", target_os = "wasi"))
+))]
+use web_time::web::SystemTimeExt;
+#[cfg(not(all(
+	target_family = "wasm",
+	not(any(target_os = "emscripten", target_os = "wasi"))
+)))]
+trait SystemTimeExt {
+    fn to_std(&self) -> SystemTime;
+}
+#[cfg(not(all(
+	target_family = "wasm",
+	not(any(target_os = "emscripten", target_os = "wasi"))
+)))]
+impl SystemTimeExt for SystemTime {
+    fn to_std(&self) -> SystemTime {
+        *self
+    }
+}
 
 type SignatureAlgorithms = &'static [&'static webpki::SignatureAlgorithm];
 
@@ -340,7 +361,7 @@ pub fn verify_server_cert_signed_by_trust_anchor(
 ) -> Result<(), Error> {
     let chain = intermediate_chain(intermediates);
     let trust_roots = trust_roots(roots);
-    let webpki_now = webpki::Time::try_from(now).map_err(|_| Error::FailedToGetCurrentTime)?;
+    let webpki_now = webpki::Time::try_from(now.to_std()).map_err(|_| Error::FailedToGetCurrentTime)?;
 
     cert.0
         .verify_for_usage(
@@ -631,7 +652,7 @@ impl ClientCertVerifier for AllowAnyAuthenticatedClient {
         let cert = ParsedCertificate::try_from(end_entity)?;
         let chain = intermediate_chain(intermediates);
         let trust_roots = trust_roots(&self.roots);
-        let now = webpki::Time::try_from(now).map_err(|_| Error::FailedToGetCurrentTime)?;
+        let now = webpki::Time::try_from(now.to_std()).map_err(|_| Error::FailedToGetCurrentTime)?;
 
         #[allow(trivial_casts)] // Cast to &dyn trait is required.
         let crls = self
@@ -930,7 +951,7 @@ fn verify_tls13(
 }
 
 fn unix_time_millis(now: SystemTime) -> Result<u64, Error> {
-    now.duration_since(std::time::UNIX_EPOCH)
+    now.duration_since(web_time::UNIX_EPOCH)
         .map(|dur| dur.as_secs())
         .map_err(|_| Error::FailedToGetCurrentTime)
         .and_then(|secs| {

@@ -943,7 +943,7 @@ impl State<ServerConnectionData> for ExpectCertificate {
             Some(chain) => chain,
         };
 
-        let now = std::time::SystemTime::now();
+        let now = web_time::SystemTime::now();
         self.config
             .verifier
             .verify_client_cert(end_entity, intermediates, now)

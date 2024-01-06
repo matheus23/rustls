@@ -684,7 +684,7 @@ impl State<ClientConnectionData> for ExpectCertificateVerify {
             .cert_chain
             .split_first()
             .ok_or(Error::NoCertificatesPresented)?;
-        let now = std::time::SystemTime::now();
+        let now = web_time::SystemTime::now();
         let cert_verified = self
             .config
             .verifier
